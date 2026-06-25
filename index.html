@@ -4,9 +4,175 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>T-Shirts</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .shirts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .shirt {
+      width: 300px;
+      margin-bottom: 30px;
+    }
+
+    .shirt img {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .shirt h2 {
+      margin: 5px 0;
+      font-size: 28px;
+    }
+
+    .price {
+      font-weight: bold;
+    }
+
+    .out {
+      color: darkred;
+    }
+
+    select {
+      width: 160px;
+      padding: 8px;
+      margin-right: 20px;
+    }
+
+    button {
+      background-color: #4f5965;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
-  
-  
+
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <script src="t-shirts.js"></script>
+
+  <script type="text/babel">
+
+    function TShirt ({ tshirt, index, buyHandler, quantityHandler }) {
+      const options = []
+
+      for (let i = 1; i <= tshirt.stock; i++) {
+       options.push(<option value={i}>{i}</option>)
+      }
+
+      return (
+        <div className="shirt">
+          <img src={'images/' + tshirt.image} alt={tshirt.title} />
+
+          <h2>{tshirt.title}</h2>
+
+          <p className="price">$ {tshirt.price}</p>
+
+          {
+            tshirt.stock === 0
+              ? <p className="out">Out of Stock</p>
+              : <p>{tshirt.stock} left!</p>
+          }
+
+          {
+            tshirt.stock > 0
+              ? (
+                <div>
+                  <select value={tshirt.quantity} onChange={(event) => quantityHandler(index, event)}>
+                    {options}
+                  </select>
+
+                  <button onClick={() => buyHandler(index)}>Buy</button>
+                </div>
+              )
+              : ''
+          }
+        </div>
+      )
+    }
+
+    function App () {
+      const [shirts, setShirts] = React.useState(tshirts)
+
+      const quantityHandler = (index, event) => {
+        const newShirts = shirts.map((shirt, i) => {
+          if (i === index) {
+            return {
+              title: shirt.title,
+              image: shirt.image,
+              price: shirt.price,
+              stock: shirt.stock,
+              quantity: Number(event.target.value)
+            }
+          }
+
+          return shirt
+        })
+
+        setShirts(newShirts)
+      }
+
+      const buyHandler = (index) => {
+        const newShirts = shirts.map((shirt, i) => {
+          if (i === index) {
+            return {
+              title: shirt.title,
+              image: shirt.image,
+              price: shirt.price,
+              stock: shirt.stock - shirt.quantity,
+              quantity: 1
+            }
+          }
+
+          return shirt
+        })
+
+        setShirts(newShirts)
+      }
+
+      return (
+        <div>
+          <h1>T-Shirts</h1>
+
+          <div className="shirts">
+            {
+              shirts.map((shirt, index) => (
+                <TShirt
+                  key={index}
+                  tshirt={shirt}
+                  index={index}
+                  buyHandler={buyHandler}
+                  quantityHandler={quantityHandler}
+                />
+              ))
+            }
+          </div>
+        </div>
+      )
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'))
+
+  </script>
+
 </body>
 </html>
